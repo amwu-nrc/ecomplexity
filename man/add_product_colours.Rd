@@ -4,12 +4,10 @@
 \alias{add_product_colours}
 \title{Add Atlas of Economic Complexity section colours to products}
 \usage{
-add_product_colours(data, digits)
+add_product_colours(data)
 }
 \arguments{
 \item{data}{a data frame with a column of hs92 product codes}
-
-\item{digits}{representation of hs92 product codes. either four or six digits.}
 }
 \value{
 tibble
@@ -20,6 +18,6 @@ Add Atlas of Economic Complexity section colours to products
 \examples{
 \dontrun{
 read_complexitydata("state_economic_complexity") |>
-add_product_colours(digits = 4)
+add_product_colours()
 }
 }

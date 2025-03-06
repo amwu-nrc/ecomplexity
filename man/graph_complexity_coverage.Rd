@@ -22,7 +22,7 @@ ggplot2 object
 Data Coverage
 }
 \examples{
-\dontrun{
-graph_complexity_coverage(data, "sa3", "indp")
-}
+data <- read_complexitydata("sa3_indp3")
+graph_complexity_coverage(data, "sa3", "indp3")
+
 }

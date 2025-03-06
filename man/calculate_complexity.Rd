@@ -23,6 +23,8 @@ calculate_complexity(
 \item{value}{variable in \code{data} which corresponds to a value.}
 
 \item{year}{year to calculate complexity indicators.}
+
+\item{method}{The method used to calculate economic complexity indicators. One of eigenvalues (the default), fitness, or shares.}
 }
 \value{
 dataframe
@@ -31,13 +33,6 @@ dataframe
 Calculate economic complexity indicators
 }
 \examples{
-\dontrun{
-
-calculate_complexity(state_data,
-region = "location_code",
-product = "hs_product_code",
-value = "export_value",
-year = 1996)
-
-}
+data <- read_complexitydata("combined_exports")
+calculate_complexity(data, region = "location_code", product = "hs_product_code", value = "export_value", year = 1996)
 }

@@ -29,11 +29,12 @@ Imports:
     tidyr,
     tmap (>= 3.99.9002),
     treemapify
-Remotes:  
+Remotes: 
     aiti-flinders/complexitydata,
     runapp-aus/strayr,
     r-tmap/tmap
 Depends: 
     R (>= 2.10)
 Suggests: 
-    ecomplexity
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

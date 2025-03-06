@@ -7,6 +7,8 @@
 graph_complexity_tree(data, year, region)
 }
 \arguments{
+\item{data}{export data}
+
 \item{year}{year}
 
 \item{region}{which region to draw the map. Only Australian States supported.}
@@ -18,7 +20,6 @@ ggraph2 object
 Colours adjusted to match Atlas of Economic Complexity.
 }
 \examples{
-\dontrun{
-graph_complexity_tree(2021, "SA")
-}
+data <- read_complexitydata("state_economic_complexity")
+graph_complexity_tree(data, 2022, "SA")
 }

@@ -18,6 +18,5 @@ tmap object
 Complexity map
 }
 \examples{
-\dontrun{
-graph_complexity_map(data, "city_complexity_index")}
+\dontrun{graph_complexity_map(data, "city_complexity_index")}
 }

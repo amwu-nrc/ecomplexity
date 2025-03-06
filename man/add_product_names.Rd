@@ -4,12 +4,10 @@
 \alias{add_product_names}
 \title{Add product names to a dataset}
 \usage{
-add_product_names(data, digits)
+add_product_names(data)
 }
 \arguments{
 \item{data}{a data frame with a column of hs92 product codes}
-
-\item{digits}{representation of hs92 product codes. either four or six digits.}
 }
 \value{
 tibble
@@ -21,6 +19,6 @@ Add product names to a dataset
 \dontrun{
 library(complexitydata)
 state_economic_complexity |> 
-add_product_digits(digits = 4)
+add_product_digits()
 }
 }

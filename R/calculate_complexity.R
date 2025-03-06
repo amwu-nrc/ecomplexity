@@ -5,19 +5,16 @@
 #' @param product variable in `data` which corresponds to a product.
 #' @param value variable in `data` which corresponds to a value.
 #' @param year year to calculate complexity indicators.
+#' @param method The method used to calculate economic complexity indicators. One of eigenvalues (the default), fitness, or shares.
 #'
 #' @return dataframe
 #' @export
+#' @importFrom stats cor cov.wt sd setNames density median
 #'
-#' @examples \dontrun{
-#'
-#' calculate_complexity(state_data,
-#' region = "location_code",
-#' product = "hs_product_code",
-#' value = "export_value",
-#' year = 1996)
-#'
-#' }
+#' @examples 
+#' data <- read_complexitydata("combined_exports")
+#' calculate_complexity(data, region = "location_code", product = "hs_product_code", value = "export_value", year = 1996)
+
 calculate_complexity <- function(data, region, product, value, year, method = "eigenvalues") {
   
   data <- data |>
@@ -72,25 +69,8 @@ calculate_complexity <- function(data, region, product, value, year, method = "e
 
 
 
-#' Calculate economic complexity indicators using Davies and Mare 2021 method of weighted correlations.
-#'
-#' @param data data suitable for calculating complexity.
-#' @param region variable in `data` which corresponds to a region.
-#' @param product variable in `data` which corresponds to a product. 
-#' @param value variable in `data` which corresponds to a value.
-#' @param method the method used to calculate economic complexity indicators. One of 'eigenvalue', 'fitness', or 'shares'.
-#' @param verbose logical. FALSE (the default) provides no messages to the user. 
-#'
-#' @return the supplied `data` with calculated city and activity complexity. 
-#' @export
-#'
-#' @examples \dontrun{
-#' 
-#' calculate_complexity_shares(data, region = "sa3", product = "indp", value = "count")
-#' 
-#' }
-#' 
-#' @importFrom stats cor cov.wt sd setNames
+
+
 calculate_complexity_shares <- function(data, region, product, value, verbose = FALSE) {
   
   m <- data |> 
@@ -140,9 +120,6 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   names(complexity$complexity_index_country) <- rownames(m)
   
   # City complexity is positively correlated with the local share weighted mean complexity of activities in city c. 
-  # Having said that, I don't think this is working correctly in this context. Temporarily, it makes sense
-  # to just make sure that the CBD have positive complexity. 
-  
 
   local_share_mean_complexity <- activity_share %*% complexity$complexity_index_product
 

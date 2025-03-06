@@ -5,10 +5,10 @@
 #' @return ggraph2 object
 #' @export
 #'
-#' @examples \dontrun{
-#' library(complexitydata) 
-#' graph_complexity_rank(data = state_economic_complexity)
-#' }
+#' @examples 
+#' library(ecomplexity)
+#' data <- read_complexitydata("state_economic_complexity")
+#' graph_complexity_rank(data)
 graph_complexity_rank <- function(data) {
   
   if(!all(c("year", "location_code", "eci_rank", "eci_rank_first", "eci_rank_final") %in% colnames(data))) {
@@ -71,30 +71,33 @@ graph_complexity_rank <- function(data) {
 #'
 #' @param year year
 #' @param region which region to draw the map. Only Australian States supported. 
+#' @param data export data
 #'
 #' @return ggraph2 object
 #' @export
 #'
-#' @examples \dontrun{
-#' graph_complexity_tree(2021, "SA")
-#' }
+#' @examples 
+#' data <- read_complexitydata("state_economic_complexity")
+#' graph_complexity_tree(data, 2022, "SA")
+
 graph_complexity_tree <- function(data, year, region) {
   
-  data |> 
+  data <- data |> 
     dplyr::filter(.data$year == {{year}},
                   .data$location_code == {{region}},
                   .data$hs_product_code != "unspecified") |>
     dplyr::mutate(export_value_share = scales::label_percent(accuracy = 0.1, scale = 100)(.data$export_value/sum(.data$export_value)),
                   pci_label = scales::label_number(accuracy = 0.01)(.data$product_complexity_index)) |> 
-    dplyr::left_join(product_data, by = "hs_product_code") |> 
-    ggplot2::ggplot(ggplot2::aes(area = .data$export_value, fill = round(.data$product_complexity_index, 3), subgroup = .data$section_name, 
+    dplyr::left_join(product_data, by = "hs_product_code") 
+  
+  ggplot2::ggplot(data = data, ggplot2::aes(area = .data$export_value, fill = round(.data$product_complexity_index, 3), subgroup = .data$section_name, 
                                  label = paste(.data$hs_product_name_short_en, .data$pci_label, sep = "\n"))) +
     treemapify::geom_treemap(colour = "white") + 
     treemapify::geom_treemap_text(ggplot2::aes(colour = ggplot2::after_scale(prismatic::best_contrast(fill, c("white", "black")))), place = "centre", size = 15) + 
     treemapify::geom_treemap_subgroup_border(colour = "white", size = 1.5) + 
     ggplot2::scale_fill_gradientn(colours = atlas_complexity_colours()$colour, 
                                   values = atlas_complexity_colours()$percent, 
-                                  breaks = c(-3.35, 2.3),
+                                  breaks = range(data$product_complexity_index),
                                   labels = c("Low Complexity", "High Complexity")) +
     ggplot2::guides(fill = ggplot2::guide_colorbar(barwidth = 10, 
                                                    title = NULL,
@@ -182,9 +185,10 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
 #' @return ggplot2 object
 #' @export
 #'
-#' @examples \dontrun{
-#' graph_complexity_coverage(data, "sa3", "indp")
-#' }
+#' @examples 
+#' data <- read_complexitydata("sa3_indp3")
+#' graph_complexity_coverage(data, "sa3", "indp3")
+#' 
 graph_complexity_coverage <- function(data, region, activity, flip = FALSE) {
   
   region_size = paste0(region, "_size")
@@ -220,8 +224,7 @@ graph_complexity_coverage <- function(data, region, activity, flip = FALSE) {
 #' @return tmap object
 #' @export
 #'
-#' @examples \dontrun{
-#' graph_complexity_map(data, "city_complexity_index")}
+#' @examples \dontrun{graph_complexity_map(data, "city_complexity_index")}
 graph_complexity_map <- function(data, fill.var) {
 
   tmap::tm_shape(data) + 
@@ -237,9 +240,48 @@ graph_complexity_map <- function(data, fill.var) {
 }
 
 
-graph_complexity_circle <- function() {
+#' Complexity opportunities
+#'
+#' @param data 
+#' @param region 
+#' @param industry 
+#'
+#' @returns ggplot
+#' @export
+#'
+#' @examples
+graph_complexity_opportunities <- function(data, region, industry) {
   
+  if(is.null(industry)) {
+    data <- data |> 
+      dplyr::filter(location_code == {{region}})
+  } else {
+    data <- data |> 
+      dplyr::filter(location_code == {{region}},
+             sector == {{industry}})
+  }
+  
+  data |> 
+    add_product_names() |> 
+    dplyr::filter(rca < 1) |> 
+    ggplot2::ggplot(ggplot2::aes(x = density, y = cog, col = sector, text = hs_product_name_short_en)) + 
+    ggplot2::geom_point() + 
+    ggplot2::geom_hline(yintercept = 0,
+                        linetype = 2, 
+                        linewidth = 0.5) +
+    ggplot2::geom_vline(xintercept = median(data$density),
+                        linetype = 2,
+                        linewidth = 0.5) +
+    ggplot2::scale_colour_manual(name = NULL,
+                                 values = complexity_classification$colour,
+                                 breaks = complexity_classification$sector) +
+    ggplot2::labs(x = "Distance",
+                  y = "Complexity Gain") +
+    cowplot::theme_cowplot() +
+    ggplot2::theme(legend.position = "bottom",
+                   legend.justification = "center") 
 }
+
 
 #' Atlas of Economic Complexity PCI colour map
 #' @importFrom grDevices rgb

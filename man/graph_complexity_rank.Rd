@@ -16,8 +16,7 @@ ggraph2 object
 Economic complexity rank time series
 }
 \examples{
-\dontrun{
-library(complexitydata) 
-graph_complexity_rank(data = state_economic_complexity)
-}
+library(ecomplexity)
+data <- read_complexitydata("state_economic_complexity")
+graph_complexity_rank(data)
 }
