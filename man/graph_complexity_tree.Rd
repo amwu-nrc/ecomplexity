@@ -14,7 +14,7 @@ graph_complexity_tree(data, year, region)
 \item{region}{which region to draw the map. Only Australian States supported.}
 }
 \value{
-ggraph2 object
+ggplot2 object
 }
 \description{
 Colours adjusted to match Atlas of Economic Complexity.

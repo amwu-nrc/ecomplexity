@@ -16,9 +16,7 @@ Imports:
     economiccomplexity,
     forcats,
     ggplot2,
-    ggraph,
     glue,
-    igraph,
     prismatic,
     purrr,
     rlang,
@@ -34,6 +32,8 @@ Remotes:
 Depends: 
     R (>= 2.10)
 Suggests: 
+    ggraph,
+    igraph,
     testthat (>= 3.0.0),
     tmap
 Config/testthat/edition: 3

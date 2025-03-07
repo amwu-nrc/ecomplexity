@@ -10,7 +10,7 @@ graph_complexity_rank(data)
 \item{data}{complexity dataset from \code{complexitydata} package}
 }
 \value{
-ggraph2 object
+ggplot2 object
 }
 \description{
 Economic complexity rank time series

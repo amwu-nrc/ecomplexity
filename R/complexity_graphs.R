@@ -2,7 +2,7 @@
 #'
 #' @param data complexity dataset from `complexitydata` package
 #'
-#' @return ggraph2 object
+#' @return ggplot2 object
 #' @export
 #'
 #' @examples 
@@ -73,7 +73,7 @@ graph_complexity_rank <- function(data) {
 #' @param region which region to draw the map. Only Australian States supported. 
 #' @param data export data
 #'
-#' @return ggraph2 object
+#' @return ggplot2 object
 #' @export
 #'
 #' @examples 
@@ -113,6 +113,9 @@ graph_complexity_tree <- function(data, year, region) {
 }
 
 graph_complexity_product_space <- function(country, year, services = FALSE) {
+  
+  rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
+  
   
   working_data <- read_complexitydata("combined_exports") |> 
     dplyr::filter(.data$year == {{year}},
