@@ -27,14 +27,13 @@ Imports:
     strayr (>= 0.2.2.9002),
     tibble,
     tidyr,
-    tmap (>= 3.99.9002),
     treemapify
 Remotes: 
     aiti-flinders/complexitydata,
     runapp-aus/strayr,
-    r-tmap/tmap
 Depends: 
     R (>= 2.10)
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tmap
 Config/testthat/edition: 3
