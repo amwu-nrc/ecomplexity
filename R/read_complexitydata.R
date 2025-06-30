@@ -1,6 +1,6 @@
 #' Read and load into the environment, economic complexity data from the complexitydata GitHub repository
 #'
-#' @param name the name of the dataset available at `aiti-flinders/complexitydata`
+#' @param name the name of the dataset available at `amwu-nrc/complexitydata`
 #' @param refresh TRUE to force re download the file, even if it already exists on disk. 
 #' @param export_dir directory to save the downloaded file. The default saves to a temporary directory. 
 #'
@@ -14,7 +14,7 @@ read_complexitydata <- function(name = NULL,
                                 refresh = FALSE,
                                 export_dir = tempdir()) {
   
-  base_url <- "https://github.com/aiti-flinders/complexitydata/raw/master/data/"
+  base_url <- "https://github.com/amwu-nrc/complexitydata/raw/master/data/"
   url <- paste0(base_url, name, ".rda")
   
   out_path <- file.path(export_dir, paste0(name, ".rda"))
