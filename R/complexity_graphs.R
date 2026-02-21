@@ -112,6 +112,16 @@ graph_complexity_tree <- function(data, year, region) {
                    legend.justification = "center")
 }
 
+#' Draw Product Spaces
+#'
+#' @param country country
+#' @param year year
+#' @param services should services be included? Default is FALSE which excludes service exports
+#'
+#' @returns ggplot
+#' @export
+#'
+#' @examples graph_complexity_product_space("AUS",)
 graph_complexity_product_space <- function(country, year, services = FALSE) {
   
   rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
@@ -144,10 +154,11 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
     dplyr::mutate(product_export_value = sum(.data$export_value)) |> 
     dplyr::filter(.data$location_code == {{country}}) |> 
     dplyr::left_join(m, by = dplyr::join_by("location_code", "hs_product_code")) |> 
-    dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code" == "code"))
-  dplyr::group_by(.data$colour) |> 
+    dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code")) |> 
+    dplyr::group_by(.data$colour) |> 
     dplyr::mutate(colour_id = factor(m * dplyr::cur_group_id()), 
-                  colour = ifelse(.data$colour_id == 0, "grey", .data$colour)) |> 
+                  colour = ifelse(.data$colour_id == 0, "grey", .data$colour),
+                  sector = ifelse(colour_id == 0, "Not Present", colour_id)) |> 
     dplyr::ungroup()
   
   
@@ -170,7 +181,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
   
   ggraph::ggraph(net$network_product, layout = "kk") +
     ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) + 
-    ggraph::geom_node_point(ggplot2::aes(size = .data$size, colour = .data$colour)) + 
+    ggraph::geom_node_point(ggplot2::aes(size = .data$size, colour = colour)) + 
     ggplot2::scale_colour_manual(values = setNames(ps_data$colour, ps_data$colour_id))
   
   

@@ -7,7 +7,7 @@
 read_complexitydata(name = NULL, refresh = FALSE, export_dir = tempdir())
 }
 \arguments{
-\item{name}{the name of the dataset available at \code{aiti-flinders/complexitydata}}
+\item{name}{the name of the dataset available at \code{amwu-nrc/complexitydata}}
 
 \item{refresh}{TRUE to force re download the file, even if it already exists on disk.}
 
