@@ -265,7 +265,7 @@ graph_complexity_map <- function(data, fill.var) {
 #' @returns ggplot
 #' @export
 #'
-#' @examples
+#' @examples 
 graph_complexity_opportunities <- function(data, region, industry) {
   
   if(is.null(industry)) {
