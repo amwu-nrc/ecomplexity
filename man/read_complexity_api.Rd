@@ -17,6 +17,3 @@ dataframe
 \description{
 Read data from the Economic Complexity API
 }
-\examples{
-\notrun{}
-}

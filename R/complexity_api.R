@@ -6,10 +6,9 @@
 #' @returns dataframe
 #' @export
 #'
-#' @examples \notrun{}
 read_complexity_api <- function(query, query_name) {
 
-con <- GraphqlClient$new(
+con <- ghql::GraphqlClient$new(
   url = "https://atlas.hks.harvard.edu/api/graphql",
 )
 
@@ -17,14 +16,14 @@ con <- GraphqlClient$new(
 query_object <- stringr::str_split(query, pattern = "\n")[[1]][2]
 query_object <- trimws(stringr::str_remove_all(query_object, "\\("))
 
-qry <- Query$new()
+qry <- ghql::Query$new()
 
 qry$query(query_name,  
           query)
 
 qj <- con$exec(qry$queries[[query_name]])
 
-res <- fromJSON(qj, flatten = T, simplifyDataFrame = T) # Requires extra work to convert to a tibble
+res <- jsonlite::fromJSON(qj, flatten = T, simplifyDataFrame = T) # Requires extra work to convert to a tibble
 
 res[["data"]][[query_object]] |> 
   as_tibble()
