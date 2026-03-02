@@ -26,7 +26,7 @@ qj <- con$exec(qry$queries[[query_name]])
 res <- jsonlite::fromJSON(qj, flatten = T, simplifyDataFrame = T) # Requires extra work to convert to a tibble
 
 res[["data"]][[query_object]] |> 
-  as_tibble()
+  tibble::as_tibble()
 
 
 }

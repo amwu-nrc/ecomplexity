@@ -121,7 +121,9 @@ graph_complexity_tree <- function(data, year, region) {
 #' @returns ggplot
 #' @export
 #'
-#' @examples graph_complexity_product_space("AUS",)
+#' @examples \dontrun{
+#' graph_complexity_product_space("AUS")
+#' }
 graph_complexity_product_space <- function(country, year, services = FALSE) {
   
   rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
@@ -201,7 +203,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
 #'
 #' @examples 
 #' data <- read_complexitydata("sa3_indp3")
-#' graph_complexity_coverage(data, "sa3", "indp3")
+#' graph_complexity_coverage(data, "sa3", "indp")
 #' 
 graph_complexity_coverage <- function(data, region, activity, flip = FALSE) {
   
@@ -256,47 +258,7 @@ graph_complexity_map <- function(data, fill.var) {
 }
 
 
-#' Complexity opportunities
-#'
-#' @param data 
-#' @param region 
-#' @param industry 
-#'
-#' @returns ggplot
-#' @export
-#'
-#' @examples 
-graph_complexity_opportunities <- function(data, region, industry) {
-  
-  if(is.null(industry)) {
-    data <- data |> 
-      dplyr::filter(location_code == {{region}})
-  } else {
-    data <- data |> 
-      dplyr::filter(location_code == {{region}},
-             sector == {{industry}})
-  }
-  
-  data |> 
-    add_product_names() |> 
-    dplyr::filter(rca < 1) |> 
-    ggplot2::ggplot(ggplot2::aes(x = density, y = cog, col = sector, text = hs_product_name_short_en)) + 
-    ggplot2::geom_point() + 
-    ggplot2::geom_hline(yintercept = 0,
-                        linetype = 2, 
-                        linewidth = 0.5) +
-    ggplot2::geom_vline(xintercept = median(data$density),
-                        linetype = 2,
-                        linewidth = 0.5) +
-    ggplot2::scale_colour_manual(name = NULL,
-                                 values = complexity_classification$colour,
-                                 breaks = complexity_classification$sector) +
-    ggplot2::labs(x = "Distance",
-                  y = "Complexity Gain") +
-    cowplot::theme_cowplot() +
-    ggplot2::theme(legend.position = "bottom",
-                   legend.justification = "center") 
-}
+
 
 
 #' Atlas of Economic Complexity PCI colour map

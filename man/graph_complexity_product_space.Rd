@@ -20,5 +20,7 @@ ggplot
 Draw Product Spaces
 }
 \examples{
-graph_complexity_product_space("AUS",)
+\dontrun{
+graph_complexity_product_space("AUS")
+}
 }

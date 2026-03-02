@@ -23,6 +23,6 @@ Data Coverage
 }
 \examples{
 data <- read_complexitydata("sa3_indp3")
-graph_complexity_coverage(data, "sa3", "indp3")
+graph_complexity_coverage(data, "sa3", "indp")
 
 }
