@@ -122,18 +122,20 @@ graph_complexity_tree <- function(data, year, region) {
 #' @export
 #'
 #' @examples \dontrun{
-#' graph_complexity_product_space("AUS")
+#' library(dplyr)
+#' data <- read_complexitydata("atlas_economic_complexity") |> 
+#'   filter(year == 2024,
+#'          !is.na(hs_product_code))
+#' graph_complexity_product_space(data, country = "AUS", year = 2024)
 #' }
-graph_complexity_product_space <- function(country, year, services = FALSE) {
+graph_complexity_product_space <- function(data, country, year, services = FALSE) {
   
   rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
   
   
-  working_data <- read_complexitydata("combined_exports") |> 
-    dplyr::filter(.data$year == {{year}},
-                  !is.na(as.numeric(.data$hs_product_code)))
+
   
-  mcp <- working_data |> 
+  mcp <- data |> 
     economiccomplexity::balassa_index(discrete = TRUE,
                                       cutoff = 1,
                                       country = "location_code",
@@ -151,7 +153,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
   
   product_space_colours <- complexity_classification
   
-  ps_data <- working_data |> 
+  ps_data <- data |> 
     dplyr::group_by(.data$hs_product_code) |> 
     dplyr::mutate(product_export_value = sum(.data$export_value)) |> 
     dplyr::filter(.data$location_code == {{country}}) |> 
