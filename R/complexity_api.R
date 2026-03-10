@@ -12,9 +12,7 @@ con <- ghql::GraphqlClient$new(
   url = "https://atlas.hks.harvard.edu/api/graphql",
 )
 
-#Query object is the first line of the query
-query_object <- stringr::str_split(query, pattern = "\n")[[1]][2]
-query_object <- trimws(stringr::str_remove_all(query_object, "\\("))
+
 
 qry <- ghql::Query$new()
 
@@ -23,10 +21,11 @@ qry$query(query_name,
 
 qj <- con$exec(qry$queries[[query_name]])
 
-res <- jsonlite::fromJSON(qj, flatten = T, simplifyDataFrame = T) # Requires extra work to convert to a tibble
+res <- jsonlite::fromJSON(qj, flatten = T, simplifyDataFrame = T) 
 
-res[["data"]][[query_object]] |> 
-  tibble::as_tibble()
+# Requires extra work to convert to a tibble
+
+return(res)
 
 
 }
