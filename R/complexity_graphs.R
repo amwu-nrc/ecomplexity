@@ -145,7 +145,7 @@ graph_complexity_product_space <- function(data, country, year, services = FALSE
   m <- as.matrix(mcp) |> 
     as.data.frame() |> 
     tibble::rownames_to_column(var = "location_code") |> 
-    tidyr::pivot_longer(cols = -.data$location_code,
+    tidyr::pivot_longer(cols = -location_code,
                         values_to = "m",
                         names_to = "hs_product_code")
   
@@ -158,17 +158,16 @@ graph_complexity_product_space <- function(data, country, year, services = FALSE
     dplyr::mutate(product_export_value = sum(.data$export_value)) |> 
     dplyr::filter(.data$location_code == {{country}}) |> 
     dplyr::left_join(m, by = dplyr::join_by("location_code", "hs_product_code")) |> 
-    dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code")) |> 
-    dplyr::group_by(.data$colour) |> 
-    dplyr::mutate(colour_id = factor(m * dplyr::cur_group_id()), 
-                  colour = ifelse(.data$colour_id == 0, "grey", .data$colour),
-                  sector = ifelse(colour_id == 0, "Not Present", colour_id)) |> 
-    dplyr::ungroup()
+    dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code"))
   
   
   
   graph_size <- setNames(ps_data$product_export_value, ps_data$hs_product_code)
-  graph_colour <- setNames(ps_data$colour_id, ps_data$hs_product_code)
+  graph_colour <- setNames(ps_data$sector, ps_data$hs_product_code)
+  graph_presence <- setNames(ps_data$m, ps_data$hs_product_code)
+  
+  cols <- distinct(complexity_classification, sector, colour) 
+  cols <- setNames(cols$colour, cols$sector)
   
   
   net <- economiccomplexity::projections(prox$proximity_country, prox$proximity_product, compute = "product")
@@ -178,15 +177,22 @@ graph_complexity_product_space <- function(data, country, year, services = FALSE
   igraph::V(net$network_product)$size <- graph_size[match(igraph::V(net$network_product)$name, names(graph_size))]
   
   # Set attribute for "presence"
-  # igraph::V(net$network_product)$presence <- graph_presence[match(igraph::V(net$network_product)$name, names(graph_presence))] 
+  igraph::V(net$network_product)$presence <- graph_presence[match(igraph::V(net$network_product)$name, names(graph_presence))] 
   
   # Set attribute for colour
   igraph::V(net$network_product)$colour <- graph_colour[match(igraph::V(net$network_product)$name, names(graph_colour))]
   
-  ggraph::ggraph(net$network_product, layout = "kk") +
+  ggraph::ggraph(net$network_product, layout = "stress") +
     ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) + 
-    ggraph::geom_node_point(ggplot2::aes(size = .data$size, colour = colour)) + 
-    ggplot2::scale_colour_manual(values = setNames(ps_data$colour, ps_data$colour_id))
+    ggraph::geom_node_point(ggplot2::aes(size = size, colour = colour, alpha = factor(presence))) +
+    ggplot2::scale_colour_manual(name = "Sector", values = cols) +
+    ggplot2::scale_alpha_manual(guide = NULL, values = c("0" = 0, "1" = 1)) + 
+    ggplot2::scale_size(guide = NULL) + 
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      legend.position = "bottom",
+      legend.title.position = "top"
+    )
   
   
   
