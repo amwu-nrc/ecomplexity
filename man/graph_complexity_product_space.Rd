@@ -9,15 +9,22 @@ graph_complexity_product_space(
   country,
   year,
   classification,
-  services = FALSE
+  services = FALSE,
+  proj = NULL
 )
 }
 \arguments{
+\item{data}{export data}
+
 \item{country}{country}
 
 \item{year}{year}
 
+\item{classification}{hs92 or hs12}
+
 \item{services}{should services be included? Default is FALSE which excludes service exports}
+
+\item{proj}{have you already calcualted the projection?}
 }
 \value{
 ggplot

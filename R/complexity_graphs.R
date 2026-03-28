@@ -113,10 +113,12 @@ graph_complexity_tree <- function(data, year, region) {
 }
 
 #' Draw Product Spaces
-#'
+#' @param data export data
 #' @param country country
 #' @param year year
 #' @param services should services be included? Default is FALSE which excludes service exports
+#' @param classification hs92 or hs12
+#' @param proj have you already calcualted the projection?
 #'
 #' @returns ggplot
 #' @export
@@ -126,13 +128,14 @@ graph_complexity_tree <- function(data, year, region) {
 #' data <- read_complexitydata("atlas_economic_complexity12") 
 #' graph_complexity_product_space(data, country = "AUS", year = 2024, classification = "hs12")
 #' }
-graph_complexity_product_space <- function(data, country, year, classification, services = FALSE) {
+graph_complexity_product_space <- function(data, country, year, classification, services = FALSE, proj = NULL) {
   
   rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
   
   world_trade <- data |> 
     filter(year == {{year}}) |> 
     summarise(global_exports = sum(export_value), .by = hs_product_code)
+
 
   
   mcp <- data |> 
@@ -175,8 +178,10 @@ graph_complexity_product_space <- function(data, country, year, classification, 
   cols <- distinct(complexity_classification, sector, colour) 
   cols <- setNames(cols$colour, cols$sector)
   
+  if (is.null(proj)) {
   
   net <- economiccomplexity::projections(prox$proximity_country, prox$proximity_product, compute = "product")
+  } else net <- proj
   
   #Adjust dots for size (this is currently location size. Could update to do global size)
   
