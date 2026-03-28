@@ -93,13 +93,19 @@ product_data92 <- inner_join(product_data6, product_data4, by = c("product_paren
   mutate(classification = "hs92")
 
 
-complexity_classification <- product_data |> 
+complexity_classification12 <- product_data12 |> 
+  select(hs_product_code = code_4,
+         sector = name_1) |> 
+  inner_join(complexity_colours) |> 
+  distinct()
+
+complexity_classification92 <- product_data92 |> 
   select(hs_product_code = code_4,
          sector = name_1) |> 
   inner_join(complexity_colours) |> 
   distinct()
 
 
-usethis::use_data(complexity_classification, internal = TRUE, overwrite = TRUE)
+usethis::use_data(complexity_classification12, complexity_classification92, internal = TRUE, overwrite = TRUE)
 usethis::use_data(product_data12, product_data92, compress = "xz", overwrite = TRUE)
 
