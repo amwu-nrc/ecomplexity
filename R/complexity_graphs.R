@@ -123,19 +123,20 @@ graph_complexity_tree <- function(data, year, region) {
 #'
 #' @examples \dontrun{
 #' library(dplyr)
-#' data <- read_complexitydata("atlas_economic_complexity") |> 
-#'   filter(year == 2024,
-#'          !is.na(hs_product_code))
-#' graph_complexity_product_space(data, country = "AUS", year = 2024)
+#' data <- read_complexitydata("atlas_economic_complexity12") 
+#' graph_complexity_product_space(data, country = "AUS", year = 2024, classification = "hs12")
 #' }
-graph_complexity_product_space <- function(data, country, year, services = FALSE) {
+graph_complexity_product_space <- function(data, country, year, classification, services = FALSE) {
   
   rlang::check_installed(pkg = c("ggraph", "igraph"), reason = "to use `graph_complexity_map()`")
   
-  
+  world_trade <- data |> 
+    filter(year == {{year}}) |> 
+    summarise(global_exports = sum(export_value), .by = hs_product_code)
 
   
   mcp <- data |> 
+    filter(year == {{year}}) |> 
     economiccomplexity::balassa_index(discrete = TRUE,
                                       cutoff = 1,
                                       country = "location_code",
@@ -151,18 +152,23 @@ graph_complexity_product_space <- function(data, country, year, services = FALSE
   
   prox <- economiccomplexity::proximity(mcp)
   
-  product_space_colours <- complexity_classification
+  if (classification == "hs12") product_space_colours <- complexity_classification12 else{
+    product_space_colours <- complexity_classification92
   
+  }
+  
+
   ps_data <- data |> 
-    dplyr::group_by(.data$hs_product_code) |> 
-    dplyr::mutate(product_export_value = sum(.data$export_value)) |> 
-    dplyr::filter(.data$location_code == {{country}}) |> 
+    dplyr::filter(year == {{year}},
+                  .data$location_code == {{country}}) |> 
     dplyr::left_join(m, by = dplyr::join_by("location_code", "hs_product_code")) |> 
-    dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code"))
+    dplyr::right_join(product_space_colours, by = dplyr::join_by("hs_product_code")) |> 
+    tidyr::replace_na(list(year = {{year}}, m = 0)) |> 
+    dplyr::inner_join(world_trade, by = c("hs_product_code"))
   
   
   
-  graph_size <- setNames(ps_data$product_export_value, ps_data$hs_product_code)
+  graph_size <- setNames(ps_data$global_exports, ps_data$hs_product_code)
   graph_colour <- setNames(ps_data$sector, ps_data$hs_product_code)
   graph_presence <- setNames(ps_data$m, ps_data$hs_product_code)
   

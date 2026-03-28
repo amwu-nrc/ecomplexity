@@ -4,7 +4,13 @@
 \alias{graph_complexity_product_space}
 \title{Draw Product Spaces}
 \usage{
-graph_complexity_product_space(country, year, services = FALSE)
+graph_complexity_product_space(
+  data,
+  country,
+  year,
+  classification,
+  services = FALSE
+)
 }
 \arguments{
 \item{country}{country}
@@ -21,6 +27,8 @@ Draw Product Spaces
 }
 \examples{
 \dontrun{
-graph_complexity_product_space("AUS")
+library(dplyr)
+data <- read_complexitydata("atlas_economic_complexity12") 
+graph_complexity_product_space(data, country = "AUS", year = 2024, classification = "hs12")
 }
 }
