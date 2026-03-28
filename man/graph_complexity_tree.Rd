@@ -4,7 +4,7 @@
 \alias{graph_complexity_tree}
 \title{Export Tree Map.}
 \usage{
-graph_complexity_tree(data, year, region)
+graph_complexity_tree(data, year, region, classification)
 }
 \arguments{
 \item{data}{export data}
@@ -12,6 +12,8 @@ graph_complexity_tree(data, year, region)
 \item{year}{year}
 
 \item{region}{which region to draw the map. Only Australian States supported.}
+
+\item{classification}{hs92 or hs12}
 }
 \value{
 ggplot2 object
@@ -21,5 +23,5 @@ Colours adjusted to match Atlas of Economic Complexity.
 }
 \examples{
 data <- read_complexitydata("state_economic_complexity")
-graph_complexity_tree(data, 2022, "SA")
+graph_complexity_tree(data, 2022, "SA", classification = "hs92")
 }

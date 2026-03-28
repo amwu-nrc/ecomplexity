@@ -35,7 +35,7 @@ Draw Product Spaces
 \examples{
 \dontrun{
 library(dplyr)
-data <- read_complexitydata("atlas_economic_complexity12") 
+data <- read_complexitydata("atlas_economic_complexity12")
 graph_complexity_product_space(data, country = "AUS", year = 2024, classification = "hs12")
 }
 }
