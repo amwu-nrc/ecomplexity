@@ -14,9 +14,10 @@
 #' \item{section_name}{Name of the product section. }
 #' }
 #' @source \url{https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/3BAL1O/WQZPYX&version=4.0}
-"product_data"
+"product_data92"
 
-
+#' Harmonised System (2012) product data
+"product_data12"
 
 
 #' ANZSIC to Harmonised System concordance

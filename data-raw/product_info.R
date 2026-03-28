@@ -100,5 +100,6 @@ complexity_classification <- product_data |>
   distinct()
 
 
-usethis::use_data(complexity_classification, product_data12, product_data92, internal = TRUE, overwrite = TRUE)
+usethis::use_data(complexity_classification, internal = TRUE, overwrite = TRUE)
+usethis::use_data(product_data12, product_data92, compress = "xz", overwrite = TRUE)
 
