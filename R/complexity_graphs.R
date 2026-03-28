@@ -220,11 +220,11 @@ graph_complexity_product_space <- function(
   )
 
   world_trade <- data |>
-    filter(year == {{ year }}) |>
-    summarise(global_exports = sum(export_value), .by = hs_product_code)
+    dplyr::filter(year == {{ year }}) |>
+    dplyr::summarise(global_exports = sum(export_value), .by = hs_product_code)
 
   mcp <- data |>
-    filter(year == {{ year }}) |>
+    dplyr::filter(year == {{ year }}) |>
     economiccomplexity::balassa_index(
       discrete = TRUE,
       cutoff = 1,
@@ -261,15 +261,16 @@ graph_complexity_product_space <- function(
       by = dplyr::join_by("hs_product_code")
     ) |>
     tidyr::replace_na(list(year = {{ year }}, m = 0)) |>
+    dplyr::mutate(sector = ifelse(m == 1, sector, "Not Present")) |>
     dplyr::inner_join(world_trade, by = c("hs_product_code"))
 
   graph_size <- setNames(ps_data$global_exports, ps_data$hs_product_code)
   graph_colour <- setNames(ps_data$sector, ps_data$hs_product_code)
   graph_presence <- setNames(ps_data$m, ps_data$hs_product_code)
 
-  cols <- distinct(complexity_classification, sector, colour)
+  cols <- dplyr::distinct(complexity_classification, sector, colour)
   cols <- setNames(cols$colour, cols$sector)
-
+  cols <- append(cols, c("Not Present" = "#a8a8a8"))
   if (is.null(proj)) {
     net <- economiccomplexity::projections(
       prox$proximity_country,
@@ -280,7 +281,7 @@ graph_complexity_product_space <- function(
     net <- proj
   }
 
-  #Adjust dots for size (this is currently location size. Could update to do global size)
+  #Adjust dots for size
 
   igraph::V(net$network_product)$size <- graph_size[match(
     igraph::V(net$network_product)$name,
@@ -299,14 +300,22 @@ graph_complexity_product_space <- function(
     names(graph_colour)
   )]
 
+  # Set cols back to only colours we want to see
+  cols <- dplyr::distinct(complexity_classification, sector, colour)
+
+  cols <- setNames(cols$colour, cols$sector)
+
   ggraph::ggraph(net$network_product, layout = "stress") +
     ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) +
-    ggraph::geom_node_point(ggplot2::aes(
-      size = size,
-      colour = colour,
-      alpha = factor(presence)
-    )) +
-    ggplot2::scale_colour_manual(name = "Sector", values = cols) +
+    ggraph::geom_node_point(
+      shape = 21,
+      colour = "grey",
+      ggplot2::aes(
+        size = size,
+        fill = colour,
+      )
+    ) +
+    ggplot2::scale_fill_manual(name = "Sector", values = cols) +
     ggplot2::scale_alpha_manual(guide = NULL, values = c("0" = 0, "1" = 1)) +
     ggplot2::scale_size(guide = NULL) +
     ggplot2::theme_void() +
