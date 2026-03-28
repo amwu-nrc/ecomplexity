@@ -19,34 +19,86 @@ complexity_colours <- tribble(
   "Services", "#b23d6d"
 ) 
 
-complexity_classification <- read_csv("data-raw/complexity_classifications.csv",
-                                      show_col_types = FALSE) |>
-  mutate(hs_product_code = str_pad(Code, "left", pad = "0", width = 4)) |>
-  select(hs_product_code, sector = Sector) |>
-  left_join(complexity_colours)
 
-product_data <- read_tsv("data-raw/hs_product.tab")
+product_data12 <- read_csv("data-raw/product_hs12.csv")
+product_data6 <- product_data12 |> 
+  filter(product_level == 6) |> 
+  select(product_hs12_code6 = product_hs12_code,
+         product_name_short6 = product_name_short,
+         product_id,
+         product_parent_id6 = product_parent_id)
 
-product_data_section <- product_data |>
-  filter(level == "section") |>
-  select(product_id, section_name = hs_product_name_short_en)
+product_data4 <- product_data12 |> 
+  filter(product_level == 4) |> 
+  select(product_hs12_code4 = product_hs12_code, 
+         product_name_short4 = product_name_short,
+         product_id,
+         product_parent_id4 = product_parent_id) 
 
-product_data_two <- product_data |>
-  filter(level == '2digit') |>
-  select(product_id, parent_id, group_name = hs_product_name_short_en) |>
-  left_join(product_data_section, by = c("parent_id" = "product_id")) |>
-  select(-parent_id)
+product_data2 <- product_data12 |> 
+  filter(product_level == 2) |> 
+  select(product_hs12_code2 = product_hs12_code,
+         product_name_short2 = product_name_short,
+         product_id,
+         product_parent_id2 = product_parent_id) 
 
-product_data_four <- product_data |>
-  filter(level == "4digit") |>
-  select(product_id, parent_id, hs_product_name_short_en,hs_product_code) |>
-  left_join(product_data_two, by = c("parent_id" = "product_id"))
+product_data1 <- product_data12 |> 
+  filter(product_level == 1) |> 
+  select(product_hs12_code1 = product_hs12_code,
+         product_name_short1 = product_name_short,
+         product_id,
+         product_parent_id1 = product_parent_id)
 
-product_data_six <- product_data |>
-  filter(level == "6digit") |>
-  select(product_id, parent_id, six_name = hs_product_name_short_en)
+product_data12 <- inner_join(product_data6, product_data4, by = c("product_parent_id6" = "product_id")) |> 
+  inner_join(product_data2, by = c("product_parent_id4" = "product_id")) |> 
+  inner_join(product_data1, by = c("product_parent_id2" = "product_id")) |> 
+  select(code_6 = product_hs12_code6, code_4 = product_hs12_code4, code_2 = product_hs12_code2, code_1 = product_hs12_code1,
+         name_6 = product_name_short6, name_4 = product_name_short4, name_2 = product_name_short2, name_1 = product_name_short1) |> 
+  mutate(classification = "hs12")
 
-product_data <- product_data_four
+product_data92 <- read_csv("data-raw/product_hs92.csv")
+product_data6 <- product_data92 |> 
+  filter(product_level == 6) |> 
+  select(product_hs92_code6 = product_hs92_code,
+         product_name_short6 = product_name_short,
+         product_id,
+         product_parent_id6 = product_parent_id)
 
-usethis::use_data(complexity_classification, product_data, internal = TRUE, overwrite = TRUE)
+product_data4 <- product_data92 |> 
+  filter(product_level == 4) |> 
+  select(product_hs92_code4 = product_hs92_code, 
+         product_name_short4 = product_name_short,
+         product_id,
+         product_parent_id4 = product_parent_id) 
+
+product_data2 <- product_data92 |> 
+  filter(product_level == 2) |> 
+  select(product_hs92_code2 = product_hs92_code,
+         product_name_short2 = product_name_short,
+         product_id,
+         product_parent_id2 = product_parent_id) 
+
+product_data1 <- product_data92 |> 
+  filter(product_level == 1) |> 
+  select(product_hs92_code1 = product_hs92_code,
+         product_name_short1 = product_name_short,
+         product_id,
+         product_parent_id1 = product_parent_id)
+
+product_data92 <- inner_join(product_data6, product_data4, by = c("product_parent_id6" = "product_id")) |> 
+  inner_join(product_data2, by = c("product_parent_id4" = "product_id")) |> 
+  inner_join(product_data1, by = c("product_parent_id2" = "product_id")) |> 
+  select(code_6 = product_hs92_code6, code_4 = product_hs92_code4, code_2 = product_hs92_code2, code_1 = product_hs92_code1,
+         name_6 = product_name_short6, name_4 = product_name_short4, name_2 = product_name_short2, name_1 = product_name_short1) |> 
+  mutate(classification = "hs92")
+
+
+complexity_classification <- product_data |> 
+  select(hs_product_code = code_4,
+         sector = name_1) |> 
+  inner_join(complexity_colours) |> 
+  distinct()
+
+
+usethis::use_data(complexity_classification, product_data12, product_data92, internal = TRUE, overwrite = TRUE)
 
