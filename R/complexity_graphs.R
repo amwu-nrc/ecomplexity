@@ -270,7 +270,7 @@ graph_complexity_product_space <- function(
 
   cols <- dplyr::distinct(complexity_classification, sector, colour)
   cols <- setNames(cols$colour, cols$sector)
-  cols <- append(cols, c("Not Present" = "#a8a8a8"))
+  cols <- append(cols, c("Not Present" = "#ffffff"))
   if (is.null(proj)) {
     net <- economiccomplexity::projections(
       prox$proximity_country,
@@ -301,9 +301,9 @@ graph_complexity_product_space <- function(
   )]
 
   # Set cols back to only colours we want to see
-  cols <- dplyr::distinct(complexity_classification, sector, colour)
+  # cols <- dplyr::distinct(complexity_classification, sector, colour)
 
-  cols <- setNames(cols$colour, cols$sector)
+  # cols <- setNames(cols$colour, cols$sector)
 
   ggraph::ggraph(net$network_product, layout = "stress") +
     ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) +
