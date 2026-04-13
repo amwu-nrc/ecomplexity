@@ -8,16 +8,24 @@
 #' @examples \dontrun{
 #' library(complexitydata)
 #' state_economic_complexity |> 
-#' add_product_digits()
+#' add_product_names()
 #' }
 #' @importFrom rlang .data
-add_product_names <- function(data) {
+add_product_names <- function(data, digits, classification) {
+  
+  if (classification == "hs92") {
+    product_data <- product_data92
+  } else {
+    product_data <- product_data12
+  }
   
   prod_data <- product_data |> 
-    dplyr::select("hs_product_name_short_en", "hs_product_code")
-  
+    dplyr::select(contains(digits)) |> 
+    dplyr::distinct()
+
   data |>  
-    dplyr::left_join(prod_data, by = "hs_product_code")
+    dplyr::left_join(prod_data, by = c("product_code" = "code_4")) |> 
+    dplyr::rename(name_4 = hs_name_short_en)
 }
 
 #' Add Atlas of Economic Complexity section colours to products
