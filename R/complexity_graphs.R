@@ -132,24 +132,24 @@ graph_complexity_tree <- function(data, year, region, classification) {
   data <- data |>
     dplyr::filter(
       .data$year == {{ year }},
-      .data$location_code == {{ region }},
-      .data$hs_product_code != "unspecified"
+      .data$country_iso3_code == {{ region }},
+      .data$product_code != "unspecified"
     ) |>
     dplyr::mutate(
       export_value_share = scales::label_percent(accuracy = 0.1, scale = 100)(
         .data$export_value / sum(.data$export_value)
       ),
       pci_label = scales::label_number(accuracy = 0.01)(
-        .data$product_complexity_index
+        .data$pci
       )
     ) |>
-    dplyr::left_join(product_data, by = c("hs_product_code" = "code_4"))
+    dplyr::left_join(product_data, by = c("product_code" = "code_4"))
 
   ggplot2::ggplot(
     data = data,
     ggplot2::aes(
       area = .data$export_value,
-      fill = round(.data$product_complexity_index, 3),
+      fill = round(.data$pci, 3),
       subgroup = .data$name_1,
       label = paste(.data$name_4, .data$pci_label, sep = "\n")
     )
