@@ -25,7 +25,7 @@ add_product_names <- function(data, digits, classification) {
 
   data |>  
     dplyr::left_join(prod_data, by = c("product_code" = "code_4")) |> 
-    dplyr::rename(name_4 = hs_name_short_en)
+    dplyr::rename(hs_name_short_en = name_4)
 }
 
 #' Add Atlas of Economic Complexity section colours to products
