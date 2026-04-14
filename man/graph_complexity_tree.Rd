@@ -13,7 +13,7 @@ graph_complexity_tree(data, year, region, classification)
 
 \item{region}{which region to draw the map. Only Australian States supported.}
 
-\item{classification}{hs92 or hs12}
+\item{classification}{hs92/hs12/hs22}
 }
 \value{
 ggplot2 object

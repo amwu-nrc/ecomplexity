@@ -111,7 +111,7 @@ graph_complexity_rank <- function(data) {
 #' @param year year
 #' @param region which region to draw the map. Only Australian States supported.
 #' @param data export data
-#' @param classification hs92 or hs12
+#' @param classification hs92/hs12/hs22
 #'
 #' @return ggplot2 object
 #' @export
@@ -121,13 +121,10 @@ graph_complexity_rank <- function(data) {
 #' graph_complexity_tree(data, 2022, "SA", classification = "hs92")
 
 graph_complexity_tree <- function(data, year, region, classification) {
-  if (classification == "hs12") {
-    product_data <- product_data12 |>
-      dplyr::distinct(code_4, name_4, name_1)
-  } else {
-    product_data <- product_data92 |>
-      dplyr::distinct(code_4, name_4, name_1)
-  }
+  
+  product_data <- product_data |> 
+    dplyr::filter(classification == {{classification}}) |> 
+    dplyr::distinct(code_4, name_4, name_1, classification)
 
   data <- data |>
     dplyr::filter(
@@ -169,7 +166,7 @@ graph_complexity_tree <- function(data, year, region, classification) {
     ggplot2::scale_fill_gradientn(
       colours = atlas_complexity_colours()$colour,
       values = atlas_complexity_colours()$percent,
-      breaks = range(data$product_complexity_index),
+      breaks = range(data$pci),
       labels = c("Low Complexity", "High Complexity")
     ) +
     ggplot2::guides(
@@ -181,10 +178,6 @@ graph_complexity_tree <- function(data, year, region, classification) {
         draw.llim = F,
         label.position = "top"
       )
-    ) +
-    ggplot2::labs(
-      caption = "Note: Australian product export data converted from AHECC to 4-digit Harmonised System (1992).\n
-       Services export data aggregated to EBOPS - Communications, Insurance and Finance, Transportation, Travel and Other"
     ) +
     cowplot::theme_cowplot() +
     ggplot2::theme(legend.position = "bottom", legend.justification = "center")
