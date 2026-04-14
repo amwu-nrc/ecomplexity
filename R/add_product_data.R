@@ -20,9 +20,11 @@ add_product_names <- function(data, digits, classification) {
     dplyr::filter(classification == {{classification}}) |> 
     dplyr::select(contains(as.character(digits))) |> 
     dplyr::distinct()
+  
+  jbcol <- paste0("code_", digits)
 
   data |>  
-    dplyr::left_join(prod_data, by = c("product_code" = "code_4")) |> 
+    dplyr::left_join(prod_data, by = c("product_code" = jbcol)) |> 
     dplyr::rename(hs_name_short_en = name_4)
 }
 
