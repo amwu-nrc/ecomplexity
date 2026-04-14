@@ -7,7 +7,11 @@
 add_product_names(data, digits, classification)
 }
 \arguments{
-\item{data}{a data frame with a column of hs92 product codes}
+\item{data}{a data frame with a column of product codes}
+
+\item{digits}{}
+
+\item{classification}{}
 }
 \value{
 tibble

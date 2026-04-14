@@ -1,6 +1,8 @@
 #' Add product names to a dataset
 #'
-#' @param data a data frame with a column of hs92 product codes
+#' @param data a data frame with a column of product codes
+#' @param digits 
+#' @param classification 
 #'
 #' @return tibble
 #' @export
@@ -13,13 +15,9 @@
 #' @importFrom rlang .data
 add_product_names <- function(data, digits, classification) {
   
-  if (classification == "hs92") {
-    product_data <- product_data92
-  } else {
-    product_data <- product_data12
-  }
   
   prod_data <- product_data |> 
+    dplyr::filter(classification == {{classification}})
     dplyr::select(contains(digits)) |> 
     dplyr::distinct()
 
