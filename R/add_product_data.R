@@ -25,7 +25,7 @@ add_product_names <- function(data, digits, classification) {
   rename_col <- paste0("name_", digits)
 
   data |>  
-    dplyr::left_join(prod_data, by = c("product_code" = jbcol)) |> 
+    dplyr::left_join(prod_data, by = c("product_code" = join_by_col)) |> 
     dplyr::rename(hs_name_short_en = rename_col)
 }
 
