@@ -4,7 +4,7 @@
 \alias{add_product_names}
 \title{Add product names to a dataset}
 \usage{
-add_product_names(data)
+add_product_names(data, digits, classification)
 }
 \arguments{
 \item{data}{a data frame with a column of hs92 product codes}
@@ -19,6 +19,6 @@ Add product names to a dataset
 \dontrun{
 library(complexitydata)
 state_economic_complexity |> 
-add_product_digits()
+add_product_names()
 }
 }

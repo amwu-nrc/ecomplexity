@@ -1,24 +1,21 @@
-#' Harmonised System (1992) product data.
+#' Harmonised System (1992/2012/2022) product data.
 #' 
 #' A dataset containing the names, product code, group name and section name of products
-#' categorised under the 1992 version of the Harmonised System. 
-#' Highest level of disaggregation in this data set is the four-digit HS92
+#' the Harmonised System. 
 #' 
 #' @format Tibble with
 #' \describe{
-#' \item{product_id}{The product ID.}
-#' \item{parent_id}{The product ID of the product's parent.}
-#' \item{hs_product_name_short_en}{English short name of the product.}
-#' \item{hs_product_code}{Character representation of the product code at the four-digit HS92 level.}
-#' \item{group_name}{Name of the product group.}
-#' \item{section_name}{Name of the product section. }
+#' \item{code_6}{Six digit product code}
+#' \item{code_4}{Four digit product code}
+#' \item{code_2}{Two digit product code}
+#' \item{code_1}{One digit product code}
+#' \item{name_6}{Six digit product name}
+#' \item{name_4}{Four digit product name}
+#' \item{name_2}{Two digit product name}
+#' \item{name_1}{One digit product name}
+#' \item{classification}{HS Classification}
 #' }
-#' @source \url{https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/3BAL1O/WQZPYX&version=4.0}
-"product_data92"
-
-#' Harmonised System (2012) product data
-"product_data12"
-
+"product_data"
 
 #' ANZSIC to Harmonised System concordance
 #' 
