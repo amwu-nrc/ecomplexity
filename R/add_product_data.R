@@ -21,11 +21,12 @@ add_product_names <- function(data, digits, classification) {
     dplyr::select(contains(as.character(digits))) |> 
     dplyr::distinct()
   
-  jbcol <- paste0("code_", digits)
+  join_by_col <- paste0("code_", digits)
+  rename_col <- paste0("name_", digits)
 
   data |>  
     dplyr::left_join(prod_data, by = c("product_code" = jbcol)) |> 
-    dplyr::rename(hs_name_short_en = name_4)
+    dplyr::rename(hs_name_short_en = rename_col)
 }
 
 #' Add Atlas of Economic Complexity section colours to products
