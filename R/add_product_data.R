@@ -17,7 +17,7 @@ add_product_names <- function(data, digits, classification) {
   
   
   prod_data <- product_data |> 
-    dplyr::filter(classification == {{classification}})
+    dplyr::filter(classification == {{classification}}) |> 
     dplyr::select(contains(digits)) |> 
     dplyr::distinct()
 
