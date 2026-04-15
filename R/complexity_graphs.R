@@ -189,7 +189,6 @@ graph_complexity_tree <- function(data, year, region, classification) {
 #' @param year year
 #' @param services should services be included? Default is FALSE which excludes service exports
 #' @param classification hs92 or hs12
-#' @param proj have you already calcualted the projection?
 #'
 #' @returns ggplot
 #' @export
@@ -204,8 +203,7 @@ graph_complexity_product_space <- function(
   country,
   year,
   classification,
-  services = FALSE,
-  proj = NULL
+  services = FALSE
 ) {
   rlang::check_installed(
     pkg = c("ggraph", "igraph"),
@@ -215,28 +213,13 @@ graph_complexity_product_space <- function(
   world_trade <- data |>
     dplyr::filter(year == {{ year }}) |>
     dplyr::summarise(global_exports = sum(export_value), .by = product_code)
+  
+  m <- data |> 
+    dplyr::filter(year == {{year}},
+                  country_iso3_code == {{country}}) |> 
+    dplyr::mutate(m = ifelse(export_rca >= 1, 1, 0)) |> 
+    dplyr::select(product_code, m)
 
-  mcp <- data |>
-    dplyr::filter(year == {{ year }}) |>
-    economiccomplexity::balassa_index(
-      discrete = TRUE,
-      cutoff = 1,
-      country = "country_iso3_code",
-      product = "product_code",
-      value = "export_value"
-    )
-
-  m <- as.matrix(mcp) |>
-    as.data.frame() |>
-    tibble::rownames_to_column(var = "country_iso3_code") |>
-    tidyr::pivot_longer(
-      cols = -country_iso3_code,
-      values_to = "m",
-      names_to = "product_code"
-    ) |> 
-    dplyr::filter(country_iso3_code == {{country}})
-
-  prox <- economiccomplexity::proximity(mcp)
 
   product_space_colours <- tibble::tribble(
     ~product_space_cluster_name, ~colour,
@@ -263,7 +246,8 @@ graph_complexity_product_space <- function(
   
   label_network <- tibble::tribble(
     ~x, ~y, ~label,
-    -0.36, 1.3, "Minerals"
+    -0.36, 1.3, "Minerals",
+    -1.86, 0.741, "Chemicals and Basic Metals"
   )
   
   
