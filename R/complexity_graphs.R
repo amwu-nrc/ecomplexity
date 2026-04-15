@@ -109,7 +109,7 @@ graph_complexity_rank <- function(data) {
 #' Colours adjusted to match Atlas of Economic Complexity.
 #'
 #' @param year year
-#' @param region which region to draw the map. Only Australian States supported.
+#' @param region which region to draw the map.
 #' @param data export data
 #' @param classification hs92/hs12/hs22
 #'
@@ -209,113 +209,78 @@ graph_complexity_product_space <- function(
 ) {
   rlang::check_installed(
     pkg = c("ggraph", "igraph"),
-    reason = "to use `graph_complexity_map()`"
+    reason = "to use `graph_complexity_product_space()`"
   )
 
   world_trade <- data |>
     dplyr::filter(year == {{ year }}) |>
-    dplyr::summarise(global_exports = sum(export_value), .by = hs_product_code)
+    dplyr::summarise(global_exports = sum(export_value), .by = product_code)
 
   mcp <- data |>
     dplyr::filter(year == {{ year }}) |>
     economiccomplexity::balassa_index(
       discrete = TRUE,
       cutoff = 1,
-      country = "location_code",
-      product = "hs_product_code",
+      country = "country_iso3_code",
+      product = "product_code",
       value = "export_value"
     )
 
   m <- as.matrix(mcp) |>
     as.data.frame() |>
-    tibble::rownames_to_column(var = "location_code") |>
+    tibble::rownames_to_column(var = "country_iso3_code") |>
     tidyr::pivot_longer(
-      cols = -location_code,
+      cols = -country_iso3_code,
       values_to = "m",
-      names_to = "hs_product_code"
-    )
+      names_to = "product_code"
+    ) |> 
+    dplyr::filter(country_iso3_code == {{country}})
 
   prox <- economiccomplexity::proximity(mcp)
 
-  if (classification == "hs12") {
-    product_space_colours <- complexity_classification12
-  } else {
-    product_space_colours <- complexity_classification92
-  }
-
-  ps_data <- data |>
-    dplyr::filter(year == {{ year }}, .data$location_code == {{ country }}) |>
-    dplyr::left_join(
-      m,
-      by = dplyr::join_by("location_code", "hs_product_code")
-    ) |>
-    dplyr::right_join(
-      product_space_colours,
-      by = dplyr::join_by("hs_product_code")
-    ) |>
-    tidyr::replace_na(list(year = {{ year }}, m = 0)) |>
-    dplyr::mutate(sector = ifelse(m == 1, sector, "Not Present")) |>
-    dplyr::inner_join(world_trade, by = c("hs_product_code"))
-
-  graph_size <- setNames(ps_data$global_exports, ps_data$hs_product_code)
-  graph_colour <- setNames(ps_data$sector, ps_data$hs_product_code)
-  graph_presence <- setNames(ps_data$m, ps_data$hs_product_code)
-
-  cols <- dplyr::distinct(complexity_classification, sector, colour)
-  cols <- setNames(cols$colour, cols$sector)
-  cols <- append(cols, c("Not Present" = "#ffffff"))
-  if (is.null(proj)) {
-    net <- economiccomplexity::projections(
-      prox$proximity_country,
-      prox$proximity_product,
-      compute = "product"
-    )
-  } else {
-    net <- proj
-  }
-
-  #Adjust dots for size
-
-  igraph::V(net$network_product)$size <- graph_size[match(
-    igraph::V(net$network_product)$name,
-    names(graph_size)
-  )]
-
-  # Set attribute for "presence"
-  igraph::V(net$network_product)$presence <- graph_presence[match(
-    igraph::V(net$network_product)$name,
-    names(graph_presence)
-  )]
-
-  # Set attribute for colour
-  igraph::V(net$network_product)$colour <- graph_colour[match(
-    igraph::V(net$network_product)$name,
-    names(graph_colour)
-  )]
-
-  # Set cols back to only colours we want to see
-  # cols <- dplyr::distinct(complexity_classification, sector, colour)
-
-  # cols <- setNames(cols$colour, cols$sector)
-
-  ggraph::ggraph(net$network_product, layout = "stress") +
-    ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) +
-    ggraph::geom_node_point(
-      shape = 21,
-      colour = "grey",
-      ggplot2::aes(
-        size = size,
-        fill = colour,
-      )
-    ) +
-    ggplot2::scale_fill_manual(name = "Sector", values = cols) +
-    ggplot2::scale_alpha_manual(guide = NULL, values = c("0" = 0, "1" = 1)) +
-    ggplot2::scale_size(guide = NULL) +
+  product_space_colours <- tibble::tribble(
+    ~product_space_cluster_name, ~colour,
+    "Agriculture", "#EAC218",
+    "Construction, Building, and Home Supplies", "#D1852A",
+    "Electronic and Electrical Goods", "#52E2DE",
+    "Industrial Chemicals and Metals", "#A42DE2",
+    "Metalworking and Electrical Machinery and Parts", "#C64646",
+    "Minerals", "#7C6760",
+    "Textile and Home Goods", "#757777",
+    "Textile Apparel and Accessories", "#36B250"
+  )
+  
+  ps_data <- product_space_edge_list |> 
+    igraph::graph_from_data_frame(directed = F) |> 
+    ggraph::create_layout(product_space_xy) |> 
+    dplyr::inner_join(m, by = c("name" = "product_code")) |> 
+    dplyr::inner_join(product_space_colours, by = "product_space_cluster_name") |> 
+    dplyr::inner_join(world_trade, by = c("name" = "product_code")) |> 
+    dplyr::mutate(product_space_cluster_name = ifelse(m == 0, NA, product_space_cluster_name))
+  
+  cols <- rlang::set_names(nm = product_space_colours$product_space_cluster_name, 
+                           x = product_space_colours$colour)
+  
+  label_network <- tibble::tribble(
+    ~x, ~y, ~label,
+    -0.36, 1.3, "Minerals"
+  )
+  
+  
+  ggraph::ggraph(ps_data) + 
+    ggraph::geom_node_point(shape = 21, 
+                            col = "grey",
+                            ggplot2::aes(size = global_exports, 
+                                fill = product_space_cluster_name)) +
+    ggplot2::scale_fill_manual(name = NULL,
+                               values = cols,
+                      na.translate = F,
+                      na.value = "#E9E9E9") +
+    ggplot2::scale_size(guide = "none") +
     ggplot2::theme_void() +
-    ggplot2::theme(
-      legend.position = "bottom",
-      legend.title.position = "top"
-    )
+    ggplot2::theme(legend.position = "bottom")
+
+  
 }
 
 #' Data Coverage

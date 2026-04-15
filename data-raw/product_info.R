@@ -4,9 +4,9 @@ library(tibble)
 library(readr)
 library(dplyr)
 
-complexity_colours <- tribble(
-  ~sector,  ~colour,
-  "Agriculture", "#f5cf23",
+sector_colours <- tribble(
+  ~sector,  ~colour_
+  "Agriculture",  "#F5CF23", 
   "Minerals", "#bb968a",
   "Chemicals", "#c57bd9",
   "Textiles", "#7ddaa1",
@@ -18,6 +18,18 @@ complexity_colours <- tribble(
   "Other", "#2a607c",
   "Services", "#b23d6d"
 ) 
+
+cluster_colours <- tribble(
+  ~cluster, ~colour,
+  "Agricultural", "#EAC218",
+  "Construction", "#D1852A",
+  "Electronics", "#52E2DE",
+  "Chemicals and Basic Metals", "#A42DE2",
+  "Metalworking and Machinery", "#C64646",
+  "Minerals", "#7C6760",
+  "Textile and Home", "#757777",
+  "Apparel", "#36B250"
+)
 
 # HS 22 Data
 
@@ -134,7 +146,7 @@ product_data92 <- inner_join(product_data6, product_data4, by = c("product_paren
 
 
 complexity_classification22 <- product_data22 |> 
-  select(hs_product_code = code_4,
+  select(product_code = code_4,
          sector = name_1) |> 
   inner_join(complexity_colours) |> 
   mutate(classification = "hs22") |> 
@@ -142,14 +154,14 @@ complexity_classification22 <- product_data22 |>
 
 
 complexity_classification12 <- product_data12 |> 
-  select(hs_product_code = code_4,
+  select(product_code = code_4,
          sector = name_1) |> 
   inner_join(complexity_colours) |> 
   mutate(classification = "hs12") |> 
   distinct()
 
 complexity_classification92 <- product_data92 |> 
-  select(hs_product_code = code_4,
+  select(product_code = code_4,
          sector = name_1) |> 
   inner_join(complexity_colours) |> 
   mutate(classification = "hs92") |> 
@@ -167,8 +179,17 @@ complexity_classification <- bind_rows(
   complexity_classification92
 )
 
+product_space_xy <- read_csv("data-raw/umap_layout_hs92.csv",
+                              col_select = c(product_code = product_hs92_code,
+                                         x = product_space_x,
+                                         y = product_space_y,
+                                         product_space_cluster_name)) |> 
+  arrange(product_code)
+
+product_space_edge_list <- read_csv("data-raw/top_edges_hs92.csv") |> 
+  arrange(product_hs92_code_source)
 
 
-usethis::use_data(complexity_classification, internal = TRUE, overwrite = TRUE)
+usethis::use_data(complexity_classification, product_space_xy, product_space_edge_list, internal = TRUE, overwrite = TRUE)
 usethis::use_data(product_data, compress = "xz", overwrite = TRUE)
 
