@@ -30,16 +30,4 @@
 #' @source \url{https://www.abs.gov.au/statistics/detailed-methodology-information/concepts-sources-methods/international-merchandise-trade-australia-concepts-sources-and-methods/latest-release}
 "anzsic_hs"
 
-#' Atlas of Economic Complexity colours and sectors.
-#' 
-#' The Atlas of Economic Complexity mapping between 4-digit HS92 product codes and industry sectors. 
-#' The specified colour is equivalent to the colours used on the Atlas website. 
-#' @format A tibble with 1,217 rows and 3 columns:
-#' \describe{
-#' \item{hs_product_code}{character representation of the product code - HS92 4 digits}
-#' \item{sector}{character representation of the Atlas sector}
-#' \item{colour}{hex code of the colour used on the Atlas website for each sector}
-#' }
-#' @source \url{https://doi.org/10.7910/DVN/3BAL1O}
-#'
-"complexity_classification"
+
