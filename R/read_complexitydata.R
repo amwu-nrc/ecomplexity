@@ -40,3 +40,44 @@ read_complexitydata <- function(name = NULL,
   
   return(d)
 }
+
+#' Read complexity parquet files
+#'
+#' @param classification data classification
+#' @param digits data digits
+#' @param refresh force redownload
+#' @param export_dir export directory
+#'
+#' @returns parquet
+#' @export
+#'
+#' @examples \dontrun{
+#' read_complexity_p("hs92", "4")}
+read_complexitydata_p <- function(classification,
+                                  digits, 
+                                  refresh = FALSE,
+                                  export_dir = tempdir()) {
+  
+  url <- glue::glue("https://github.com/amwu-nrc/complexitydata/raw/git-lfs/data/classification={classification}/part-0.parquet")
+
+  out_path <- file.path(export_dir, paste0("classification=",classification))
+  
+  if (!file.exists(out_path) | refresh) {
+    
+    tryCatch(
+      utils::download.file(url,
+                           destfile = out_path,
+                           mode = "wb"),
+      error = "Download failed."
+    )
+    
+    
+    
+  } else {
+    message("Reading ", classification, " file found in ", export_dir)
+  }
+  
+  arrow::open_dataset(out_path)
+  
+
+}
