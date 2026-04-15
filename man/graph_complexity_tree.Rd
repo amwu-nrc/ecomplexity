@@ -11,7 +11,7 @@ graph_complexity_tree(data, year, region, classification)
 
 \item{year}{year}
 
-\item{region}{which region to draw the map. Only Australian States supported.}
+\item{region}{which region to draw the map.}
 
 \item{classification}{hs92/hs12/hs22}
 }
