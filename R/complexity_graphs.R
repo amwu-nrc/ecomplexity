@@ -213,13 +213,17 @@ graph_complexity_product_space <- function(
   )
 
   world_trade <- data |>
-    dplyr::filter(year == {{ year }}) |>
-    dplyr::summarise(global_exports = sum(export_value), .by = product_code)
+    dplyr::filter(year == {{ year }},
+                  product_code != "XXXX") |>
+    dplyr::summarise(global_exports = sum(export_value), .by = product_code) |> 
+    dplyr::mutate(product_code = as.numeric(product_code))
   
   m <- data |> 
     dplyr::filter(year == {{year}},
-                  country_iso3_code == {{country}}) |> 
-    dplyr::mutate(m = ifelse(export_rca >= 1, 1, 0)) |> 
+                  country_iso3_code == {{country}},
+                  product_code != "XXXX") |> 
+    dplyr::mutate(m = ifelse(export_rca >= 1, 1, 0),
+                  product_code = as.numeric(product_code)) |> 
     dplyr::select(product_code, m)
 
 
@@ -235,13 +239,21 @@ graph_complexity_product_space <- function(
     "Textile Apparel and Accessories", "#36B250"
   )
   
-  ps_data <- product_space_edge_list |> 
-    igraph::graph_from_data_frame(directed = F) |> 
-    ggraph::create_layout(product_space_xy) |> 
-    dplyr::inner_join(m, by = c("name" = "product_code")) |> 
-    dplyr::inner_join(product_space_colours, by = "product_space_cluster_name") |> 
-    dplyr::inner_join(world_trade, by = c("name" = "product_code")) |> 
-    dplyr::mutate(product_space_cluster_name = ifelse(m == 0, NA, product_space_cluster_name))
+  ps_data_edges <- product_space_edge_list |> 
+    dplyr::rename(from = product_hs92_code_source,
+           to = product_hs92_code_target)
+  
+  ps_data_vertices <- product_space_xy |> 
+    dplyr::left_join(m, by = c("product_hs92_code" = "product_code")) |> 
+    tidyr::replace_na(list(m = 0)) |> 
+    dplyr::left_join(product_space_colours, by = c("product_space_cluster_name")) |> 
+    dplyr::left_join(world_trade, by = c("product_hs92_code" = "product_code")) |> 
+    dplyr::mutate(product_space_cluster_name = ifelse(m == 0, NA, product_space_cluster_name)) |> 
+    dplyr::rename(name = product_hs92_code)
+  
+  ps_data <- igraph::graph_from_data_frame(d = ps_data_edges,
+                                           vertices = ps_data_vertices) |> 
+    ggraph::create_layout(layout = product_space_xy)
   
   cols <- rlang::set_names(nm = product_space_colours$product_space_cluster_name, 
                            x = product_space_colours$colour)
@@ -258,11 +270,12 @@ graph_complexity_product_space <- function(
                             col = "grey",
                             ggplot2::aes(size = global_exports, 
                                 fill = product_space_cluster_name)) +
+    ggraph::geom_edge_link(alpha = 0.01, ggplot2::aes(end_cap = ggraph::circle(0.1, "cm"))) + 
     ggplot2::scale_fill_manual(name = NULL,
                                values = cols,
                       na.translate = F,
                       na.value = "#E9E9E9") +
-    ggplot2::scale_size(guide = "none") +
+    ggplot2::scale_size_area(guide = "none") +
     ggplot2::theme_void() +
     ggplot2::theme(legend.position = "bottom")
 
