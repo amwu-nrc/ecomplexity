@@ -205,6 +205,7 @@ graph_complexity_product_space <- function(
   country,
   year,
   classification,
+  highlight = NULL,
   services = FALSE
 ) {
   rlang::check_installed(
@@ -225,6 +226,11 @@ graph_complexity_product_space <- function(
     dplyr::mutate(m = ifelse(export_rca >= 1, 1, 0),
                   product_code = as.numeric(product_code)) |> 
     dplyr::select(product_code, m)
+  
+  if (!is.null(highlight)) {
+    m <- m |> 
+      dplyr::mutate(m = ifelse(product_code %in% highlight, 1, 0))
+  }
 
 
   product_space_colours <- tibble::tribble(
@@ -248,9 +254,10 @@ graph_complexity_product_space <- function(
     tidyr::replace_na(list(m = 0)) |> 
     dplyr::left_join(product_space_colours, by = c("product_space_cluster_name")) |> 
     dplyr::left_join(world_trade, by = c("product_hs92_code" = "product_code")) |> 
-    dplyr::mutate(product_space_cluster_name = ifelse(m == 0, NA, product_space_cluster_name)) |> 
+    dplyr::mutate(highlight = ifelse(m == 0, NA, product_space_cluster_name)) |> 
     dplyr::rename(name = product_hs92_code)
   
+
   ps_data <- igraph::graph_from_data_frame(d = ps_data_edges,
                                            vertices = ps_data_vertices) |> 
     ggraph::create_layout(layout = product_space_xy |> dplyr::select(-product_space_cluster_name))
@@ -269,7 +276,7 @@ graph_complexity_product_space <- function(
     ggraph::geom_node_point(shape = 21, 
                             col = "grey",
                             ggplot2::aes(size = global_exports, 
-                                fill = product_space_cluster_name)) +
+                                fill = highlight)) +
     ggraph::geom_edge_link(alpha = 0.01, ggplot2::aes(end_cap = ggraph::circle(0.1, "cm"))) + 
     ggplot2::scale_fill_manual(name = NULL,
                                values = cols,
