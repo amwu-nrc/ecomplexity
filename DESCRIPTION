@@ -11,6 +11,7 @@ Roxygen: list(markdown = TRUE)
 LazyData: true
 RoxygenNote: 7.3.3
 Imports: 
+    arrow,
     cowplot,
     dplyr,
     economiccomplexity,

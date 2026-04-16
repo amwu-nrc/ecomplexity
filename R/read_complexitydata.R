@@ -58,7 +58,7 @@ read_complexitydata_p <- function(classification,
                                   refresh = FALSE,
                                   export_dir = tempdir()) {
   
-  url <- glue::glue("https://github.com/amwu-nrc/complexitydata/raw/git-lfs/data/classification={classification}/part-0.parquet")
+  url <- glue::glue("https://github.com/amwu-nrc/complexitydata/raw/master/data/classification={classification}/digits={digits}/part-0.parquet")
 
   out_path <- file.path(export_dir, paste0("classification=",classification))
   
