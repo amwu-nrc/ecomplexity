@@ -253,7 +253,7 @@ graph_complexity_product_space <- function(
   
   ps_data <- igraph::graph_from_data_frame(d = ps_data_edges,
                                            vertices = ps_data_vertices) |> 
-    ggraph::create_layout(layout = product_space_xy)
+    ggraph::create_layout(layout = product_space_xy |> dplyr::select(-product_space_cluster_name))
   
   cols <- rlang::set_names(nm = product_space_colours$product_space_cluster_name, 
                            x = product_space_colours$colour)
