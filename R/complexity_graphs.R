@@ -120,11 +120,11 @@ graph_complexity_rank <- function(data) {
 #' data <- read_complexitydata("state_economic_complexity")
 #' graph_complexity_tree(data, 2022, "SA", classification = "hs92")
 
-graph_complexity_tree <- function(data, year, region, classification) {
+graph_complexity_tree <- function(data, year, region, digits, classification) {
   
   product_data <- product_data |> 
     dplyr::filter(classification == {{classification}}) |> 
-    dplyr::distinct(code_4, name_4, name_1, classification)
+    dplyr::distinct(dplyr::pick(contains(as.character(digits))), classification, name_1)
 
   data <- data |>
     dplyr::filter(
@@ -140,7 +140,9 @@ graph_complexity_tree <- function(data, year, region, classification) {
         .data$pci
       )
     ) |>
-    dplyr::left_join(product_data, by = c("product_code" = "code_4"))
+    dplyr::left_join(product_data, by = c("product_code" = paste0("code_", digits)))
+  
+  name_label <- paste0("name_", digits)
 
   ggplot2::ggplot(
     data = data,
@@ -148,7 +150,7 @@ graph_complexity_tree <- function(data, year, region, classification) {
       area = .data$export_value,
       fill = round(.data$pci, 3),
       subgroup = .data$name_1,
-      label = paste(.data$name_4, .data$pci_label, sep = "\n")
+      label = paste(.data[[name_label]], .data$pci_label, sep = "\n")
     )
   ) +
     treemapify::geom_treemap(colour = "white") +

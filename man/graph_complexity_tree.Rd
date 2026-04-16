@@ -4,7 +4,7 @@
 \alias{graph_complexity_tree}
 \title{Export Tree Map.}
 \usage{
-graph_complexity_tree(data, year, region, classification)
+graph_complexity_tree(data, year, region, digits, classification)
 }
 \arguments{
 \item{data}{export data}
