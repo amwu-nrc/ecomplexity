@@ -206,7 +206,7 @@ graph_complexity_product_space <- function(
   year,
   classification,
   highlight = NULL,
-  services = FALSE
+  colour_by = "sector"
 ) {
   rlang::check_installed(
     pkg = c("ggraph", "igraph"),
@@ -226,6 +226,12 @@ graph_complexity_product_space <- function(
     dplyr::mutate(m = ifelse(export_rca >= 1, 1, 0),
                   product_code = as.numeric(product_code)) |> 
     dplyr::select(product_code, m)
+
+  pci <- data |> 
+    dplyr::filter(year == {{year}},
+    product_code != "XXXX") |> 
+    dplyr::mutate(product_code = as.numeric(product_code)) |> 
+    dplyr::distinct(product_code, pci)
   
   if (!is.null(highlight)) {
     m <- m |> 
@@ -252,42 +258,54 @@ graph_complexity_product_space <- function(
   ps_data_vertices <- product_space_xy |> 
     dplyr::left_join(m, by = c("product_hs92_code" = "product_code")) |> 
     tidyr::replace_na(list(m = 0)) |> 
+    dplyr::left_join(pci, by = c("product_hs92_code" = "product_code")) |> 
     dplyr::left_join(product_space_colours, by = c("product_space_cluster_name")) |> 
     dplyr::left_join(world_trade, by = c("product_hs92_code" = "product_code")) |> 
     dplyr::mutate(highlight = ifelse(m == 0, NA, product_space_cluster_name)) |> 
-    dplyr::rename(name = product_hs92_code)
+    dplyr::rename(name = product_hs92_code) |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(colour = atlas_complexity_colours_manual(pci)) |> 
+    dplyr::ungroup()
   
 
   ps_data <- igraph::graph_from_data_frame(d = ps_data_edges,
                                            vertices = ps_data_vertices) |> 
     ggraph::create_layout(layout = product_space_xy |> dplyr::select(-product_space_cluster_name))
+
+  if (colour_by == "sector") {
   
   cols <- rlang::set_names(nm = product_space_colours$product_space_cluster_name, 
                            x = product_space_colours$colour)
+    
+    fill_fn <-    ggplot2::scale_fill_manual(name = NULL,
+                               values = cols,
+                      na.translate = F,
+                      na.value = "#E9E9E9") 
+    
+    fill_var <- "highlight"
+  } else {
+
+    fill_fn <- ggplot2::scale_fill_identity()
+
+
+    fill_var <- "colour"
+  }
   
-  label_network <- tibble::tribble(
-    ~x, ~y, ~label,
-    -0.36, 1.3, "Minerals",
-    -1.86, 0.741, "Chemicals and Basic Metals"
-  )
-  
+
   
   ggraph::ggraph(ps_data) + 
     ggraph::geom_node_point(shape = 21, 
                             col = "grey",
                             ggplot2::aes(size = global_exports, 
-                                fill = highlight)) +
-    ggraph::geom_edge_link(alpha = 0.01, ggplot2::aes(end_cap = ggraph::circle(0.1, "cm"))) + 
-    ggplot2::scale_fill_manual(name = NULL,
-                               values = cols,
-                      na.translate = F,
-                      na.value = "#E9E9E9") +
+                                fill = !!rlang::ensym(fill_var))) +
+    ggraph::geom_edge_link(alpha = 0.01) + 
+    fill_fn +
     ggplot2::scale_size_area(guide = "none") +
     ggplot2::theme_void() +
     ggplot2::theme(legend.position = "bottom")
 
   
-}
+  }
 
 #' Data Coverage
 #'
@@ -380,13 +398,41 @@ atlas_complexity_colours <- function() {
 
   tibble::tribble(
     ~"colour"           , ~"percent" ,
-    rgbm(227, 159, 96)  , 0          ,
-    rgbm(230, 168, 112) , 0.2465319  ,
-    rgbm(240, 202, 168) , 0.4982955  ,
-    rgbm(244, 218, 193) , 0.56296481 ,
-    rgbm(248, 230, 213) , 0.6080569  ,
-    rgbm(204, 233, 231) , 0.6331994  ,
-    rgbm(33, 159, 149)  , 0.889297   ,
+    rgbm(227, 159, 96), 0          ,
+    rgbm(231, 173, 120), 0.278697  ,
+    rgbm(235, 188, 143), 0.338965,
+    rgbm(240, 202, 168) , 0.398272  ,
+    rgbm(244, 217, 191) , 0.448314 ,
+    rgbm(248, 231, 215) , 0.493999  ,
+    rgbm(192, 228, 225) , 0.494099  ,
+    rgbm(154, 211, 207), 0.533691,
+    rgbm(116, 195, 189), 0.571435,
+    rgbm(77, 178, 171), 0.606597,
+    rgbm(40, 162, 153), 0.661681,
     rgbm(2, 146, 135)   , 1
   )
+}
+
+#' Atlas of Economic Complexity PCI Manual
+#' 
+atlas_complexity_colours_manual <- function(pci) {
+   tibble::tribble(
+    ~"colour", ~"pci_cutoff" ,
+    "#e39f60", -3.2189,
+    "#e7ad78", -1.34486,
+    "#ebbc8f", -0.9396,
+    "#f0caa8", -0.5408,
+    "#f4d9bf", -0.2043,
+    "#f8e7d7", 0.1029,
+    "#c0e4e1", 0.1029,
+    "#9ad3cf", 0.3698,
+    "#74c3bd", 0.6236,
+    "#4db2ab", 0.86004,
+    "#28a299", 1.23044,
+    "#029287", 3.5054
+   )
+  # ) |> 
+  #   dplyr::filter(pci_cutoff > pci) |> 
+  #   dplyr::slice_min(order_by = pci_cutoff, n = 1, with_ties = F) |> 
+  #   dplyr::pull(colour)
 }
