@@ -430,9 +430,8 @@ atlas_complexity_colours_manual <- function(pci) {
     "#4db2ab", 0.86004,
     "#28a299", 1.23044,
     "#029287", 3.5054
-   )
-  # ) |> 
-  #   dplyr::filter(pci_cutoff > pci) |> 
-  #   dplyr::slice_min(order_by = pci_cutoff, n = 1, with_ties = F) |> 
-  #   dplyr::pull(colour)
+  ) |> 
+    dplyr::filter(pci_cutoff > pci) |> 
+    dplyr::slice_min(order_by = pci_cutoff, n = 1, with_ties = F) |> 
+    dplyr::pull(colour)
 }
