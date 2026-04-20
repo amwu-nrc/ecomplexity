@@ -126,7 +126,7 @@ graph_complexity_tree <- function(data, year, region, digits, classification) {
     dplyr::filter(classification == {{classification}}) |> 
     dplyr::distinct(dplyr::pick(contains(as.character(digits))), classification, name_1)
 
-  data <- data |>
+  graph_data <- data |>
     dplyr::filter(
       .data$year == {{ year }},
       .data$country_iso3_code == {{ region }},
@@ -140,15 +140,18 @@ graph_complexity_tree <- function(data, year, region, digits, classification) {
         .data$pci
       )
     ) |>
-    dplyr::left_join(product_data, by = c("product_code" = paste0("code_", digits)))
+    dplyr::left_join(product_data, by = c("product_code" = paste0("code_", digits))) |> 
+    dplyr::rowwise() |> 
+    dplyr::mutate(colour = atlas_complexity_colours_manual(pci)) |> 
+    dplyr::ungroup()
   
   name_label <- paste0("name_", digits)
 
   ggplot2::ggplot(
-    data = data,
+    data = graph_data,
     ggplot2::aes(
       area = .data$export_value,
-      fill = round(.data$pci, 3),
+      fill = colour,
       subgroup = .data$name_1,
       label = paste(.data[[name_label]], .data$pci_label, sep = "\n")
     )
@@ -165,22 +168,7 @@ graph_complexity_tree <- function(data, year, region, digits, classification) {
       size = 15
     ) +
     treemapify::geom_treemap_subgroup_border(colour = "white", size = 1.5) +
-    ggplot2::scale_fill_gradientn(
-      colours = atlas_complexity_colours()$colour,
-      values = atlas_complexity_colours()$percent,
-      breaks = range(data$pci),
-      labels = c("Low Complexity", "High Complexity")
-    ) +
-    ggplot2::guides(
-      fill = ggplot2::guide_colorbar(
-        barwidth = 10,
-        title = NULL,
-        direction = "horizontal",
-        draw.ulim = F,
-        draw.llim = F,
-        label.position = "top"
-      )
-    ) +
+    ggplot2::scale_fill_identity() +
     cowplot::theme_cowplot() +
     ggplot2::theme(legend.position = "bottom", legend.justification = "center")
 }
